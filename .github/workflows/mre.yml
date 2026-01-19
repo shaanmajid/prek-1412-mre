@@ -1,0 +1,59 @@
+name: MRE for prek#1412
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  test-0229:
+    name: prek 0.2.29 (should pass)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pre-commit-hooks system-wide
+        run: |
+          pip install pre-commit-hooks
+          echo "System-wide binary location:"
+          which trailing-whitespace-fixer
+          echo "Shebang:"
+          head -1 "$(which trailing-whitespace-fixer)"
+
+      - uses: j178/prek-action@v1
+        with:
+          prek-version: '0.2.29'
+          extra-args: '--all-files'
+
+  test-0230:
+    name: prek 0.2.30 (should fail)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pre-commit-hooks system-wide
+        run: |
+          pip install pre-commit-hooks
+          echo "System-wide binary location:"
+          which trailing-whitespace-fixer
+          echo "Shebang:"
+          head -1 "$(which trailing-whitespace-fixer)"
+
+      - uses: j178/prek-action@v1
+        with:
+          prek-version: '0.2.30'
+          extra-args: '--all-files'
+
+  test-0230-no-system-hooks:
+    name: prek 0.2.30 without system hooks (should pass)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify no system-wide pre-commit-hooks
+        run: |
+          which trailing-whitespace-fixer && exit 1 || echo "Not installed system-wide (expected)"
+
+      - uses: j178/prek-action@v1
+        with:
+          prek-version: '0.2.30'
+          extra-args: '--all-files'
